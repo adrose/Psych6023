@@ -325,6 +325,18 @@ all.cor <- reli.data %>% tidyr::pivot_wider(., id_cols = ID, values_from=c(total
 cor.mat <- psych::polychoric(reli.data[,1:96])
 con.vals <- omega(cor.mat$rho, nfactors=4)
 
+# ---- split-half-reliability ---------------------
+array.vals <- 1:96
+even.vals <- array.vals[lapply(array.vals, "%%", 2)==0]
+odd.vals <- array.vals[lapply(array.vals, "%%", 2)!=0]
+score.even <- rowSums(reli.data[,even.vals], na.rm = T)
+score.odd <- rowSums(reli.data[,odd.vals], na.rm = T)
+
+## Now adjust with the spearman-Brown prophecy
+n <- 1 # amount of the test to reduce by (.5 == cuts test in half)
+cor.val <- cor(score.even, score.odd)
+sbp.val <- n*cor.val / (1+(n-1)*cor.val)
+
 # ---- plot-reliability-analyses ---------------------
 # Now plot these
 library(GGally)
