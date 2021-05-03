@@ -307,11 +307,11 @@ to.table <- for.table %>% group_by(Emotion, Gender, Race, itemCode, value) %>%
 ## Now fix the race NA issue
 to.table$Race <- gsub("([A-Z])([A-Z])", "\\1 \\2", to.table$Race)
 
-to.table %>% 
+to.table %>% filter(Emotion=="Unhappy") %>% 
   kable(., "html") %>% 
   kable_styling("striped") %>% 
   collapse_rows(., columns = 1:4) %>% 
-  save_kable("./reports/itemResponsesNominal.png")
+  save_kable("./reports/itemResponsesNominalUH.png")
 
 ## Now explore item difficulty
 ## Now do a binary () correct vs incorrect) IRT model
