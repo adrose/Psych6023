@@ -350,3 +350,17 @@ neu.cor <- cor.vals[49:72,49:72]
 neu.cor <- neu.cor[lower.tri(neu.cor)]
 unh.cor <- cor.vals[73:96,73:96]
 unh.cor <- unh.cor[lower.tri(unh.cor)]
+
+## Now plot the difficulty value taken from a CTT perspective
+dif.vals <- as.data.frame(cbind(colnames(for.irt)[2:97], colSums(for.irt3, na.rm = T) / dim(for.irt3)[1]))
+dif.vals$Emotion <- substr(strSplitMatrixReturn(dif.vals[,1], "_")[,2], 1, 1)
+dif.vals$V2 <- as.numeric(as.character(dif.vals$V2))
+summarySE(dif.vals, measurevar = "V2", groupvars = "Emotion") %>% mutate_if(is.numeric, round, 2) %>%
+  kable(., "html") %>% 
+  kable_styling(full_width = F) %>% 
+  kable_styling("striped") %>% 
+  save_kable("./reports/itemDiff.png")
+## Now plot these values
+dif.vals %>% ggplot(., aes(x=as.numeric(as.character(V2)), group=Emotion, fill=Emotion, color=Emotion)) +
+  geom_histogram() +
+  facet_grid(Emotion ~ .)
