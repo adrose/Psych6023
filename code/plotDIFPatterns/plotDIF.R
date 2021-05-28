@@ -31,8 +31,8 @@ load("./data/nunimModels.RData")
 nures_nunifrom <- nures
 
 ## Load the demo data
-load("./data/fname.gz")
-ds_demo <- out.data[[9]]
+#load("./data/fname.gz")
+#ds_demo <- out.data[[9]]
 
 # ---- plot-models --------------------------------------------------------
 ## First grab all of the significant non uniform models
@@ -62,7 +62,7 @@ prob.vals.mean$contrast <- "Mean/Mean"
 ## Now do the mean logit vals for an individual @ + 1 sd for both cats
 logit.vals.plus1.b <- (seq.vals * 1.291) - .227  -.6 + .234 + .664 
 prob.vals.plus1.b <- logit2prob(logit.vals.plus1.b)
-prob.vals.plus1.b$contrast <- "+2ACE/+2HV"
+prob.vals.plus1.b$contrast <- "2ACE/2HV"
 
 
 ## Now do the mean logit vals for an individual @ - 1 sd for both cats
@@ -85,10 +85,46 @@ prob.vals.minus.c$contrast <- "-2ACE/2HV"
 all.prob.vals <- rbind(prob.vals.mean, prob.vals.plus1.b, prob.vals.minus.b, prob.vals.minus.a, prob.vals.minus.c)
 all.prob.vals$theta <- rep(seq.vals, 5)
 
+## Now do item #2
+logit.vals.mean <- (seq.vals * .381) + .152  
+prob.vals.mean <- logit2prob(logit.vals.mean)
+prob.vals.mean$contrast <- "Mean/Mean"
+
+
+## Now do the mean logit vals for an individual @ + 2 sd for both cats
+logit.vals.plus1.b <- (seq.vals * .381) + .152 -.48 -1.6 - 1.4 
+prob.vals.plus1.b <- logit2prob(logit.vals.plus1.b)
+prob.vals.plus1.b$contrast <- "2ACE/2HV"
+
+
+## Now do the mean logit vals for an individual @ - 1 sd for both cats
+logit.vals.minus.b <- (seq.vals * .381) + .152 - .48  - 1.6  - 1.4 
+prob.vals.minus.b <- logit2prob(logit.vals.minus.b)
+prob.vals.minus.b$contrast <- "-2ACE/-2HV"
+
+## Now do the mean logit vals for an individual @ - 1 sd for both cats
+logit.vals.minus.a <- (seq.vals * .381) + .152 + .48  - 1.6  + 1.4  
+prob.vals.minus.a <- logit2prob(logit.vals.minus.a)
+prob.vals.minus.a$contrast <- "2ACE/-2HV"
+
+## Now do the mean logit vals for an individual @ - 1 sd for both cats
+logit.vals.minus.c <- (seq.vals * .381) + .152  - .48 + 1.6 + 1.4
+prob.vals.minus.c <- logit2prob(logit.vals.minus.c)
+prob.vals.minus.c$contrast <- "-2ACE/2HV"
+
+all.prob.vals.2 <- rbind(prob.vals.mean, prob.vals.plus1.b, prob.vals.minus.b, prob.vals.minus.a, prob.vals.minus.c)
+all.prob.vals.2$theta <- rep(seq.vals, 5)
+
+## Now combine these
+all.prob.vals$Question <- 1
+all.prob.vals.2$Question <- 2
+all.probv.vals <- rbind(all.prob.vals, all.prob.vals.2)
+
 ## Now plot this
-all.prob.vals %>% ggplot(., aes(x=theta, y=probs, group=contrast, fill=contrast, color=contrast)) +
+all.probv.vals %>% ggplot(., aes(x=theta, y=probs, group=contrast, fill=contrast, color=contrast)) +
   geom_line() +
-  ggtitle("Uniform DIF: Unhappy Question 4") +
+  ggtitle("Uniform DIF: Unhappy Questions") +
   theme_bw() +
   ylab("Probability of Endorsement") +
-  xlab("Theta")
+  xlab("Theta") +
+  facet_grid(Question ~ .)
