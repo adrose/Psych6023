@@ -311,11 +311,60 @@ ds_demo <- out.data[[9]]
 ## Now merge the data
 for.mimic <- merge(for.irt3, ds_demo, by="record_id", all=T)
 
-# ---- dim-assess --------------------------------------------------------
+# ---- dim-assess-fa --------------------------------------------------------
 # First calc the cor mat
 cor.mat <- polychoric(for.irt3[,1:96])
-pca.decomp <- principal(cor.mat$rho, nfactors = 4, rotate = "varimax")
+pca.decomp <- principal(cor.mat$rho, nfactors = 4, rotate = "varimax", n.obs = 244)
 plot(pca.decomp$values)
 fa.decomp <- fa(cor.mat$rho, nfactors = 4, rotate = "varimax")
 ## Now do a scree plot
-fa.parallel(cor.mat$rho, fa = "fa")
+fa.parallel(cor.mat$rho, fa = "fa", fm="ml")
+
+
+# ---- dim-assess-loadings --------------------------------------------------------
+cor.mat <- polychoric(for.irt3[,1:96])
+fa.one.fac <- fa(r = cor.mat$rho, nfactors=1, rotate = "oblique", n.obs = 244)
+fa.two.fac <- fa(cor.mat$rho, nfactors=2, rotate = "oblique", n.obs = 244)
+fa.thr.fac <- fa(cor.mat$rho, nfactors=3, rotate = "oblique", n.obs = 244)
+fa.fou.fac <- fa(cor.mat$rho, nfactors=4, rotate = "oblique", n.obs = 244)
+
+## Now prep a table for all of these results
+all.loads <- matrix(NA, nrow = 96, ncol=12)
+all.loads[,3] <- fa.one.fac$loadings
+all.loads[,4:5] <- fa.two.fac$loadings
+all.loads[,6:8] <- fa.thr.fac$loadings
+all.loads[,9:12] <- fa.fou.fac$loadings
+
+## NOw organize these for kable
+colnames(all.loads) <- c("Emotion", "Item", rep("Unidimensional", 1), rep("2-Factor", 2), rep("3-Factor", 3), rep("4-Factor", 4))
+tmp <- abs(all.loads[,9:12])
+
+table(apply(tmp[1:24,], c(1), which.max))
+table(apply(tmp[25:48,], c(1), which.max))
+table(apply(tmp[49:72,], c(1), which.max))
+table(apply(tmp[73:96,], c(1), which.max))
+
+
+## Mask low loadings
+all.loads[which(abs(all.loads)<.15)] <- NA
+
+
+all.loads[,2] <- strSplitMatrixReturn(strSplitMatrixReturn(colnames(for.irt)[2:97], "_")[,2], ",")[,1]
+all.loads[1:24,1] <- "Crying"
+all.loads[25:48,1] <- "Happy"
+all.loads[49:72,1] <- "Neutral"
+all.loads[73:96,1] <- "Unhappy"
+
+options(knitr.kable.NA = '')
+all.loads %>% 
+  kable(., "html") %>% 
+  kable_styling("striped") %>% 
+  collapse_rows(columns = 1) %>% 
+  save_kable("./reports/itemLoadings.png")
+
+## Look for modal loadings here
+all.loads <- as.data.frame(all.loads)
+table(apply(all.loads[1:24,9:12], 1, which.max))
+table(apply(all.loads[25:48,9:12], 1, which.max))
+table(apply(all.loads[49:72,9:12], 1, which.max))
+table(apply(all.loads[1:24,9:12], 1, which.max))
